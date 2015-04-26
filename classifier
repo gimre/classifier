@@ -1,0 +1,48 @@
+#!/bin/bash
+
+directory="$1"
+filename="$2"
+
+# exit if first argument is not a valid directory
+if [ ! -d "$directory" ]; then
+    exit 1;
+fi
+
+function classify {
+    ext="${1##*.}"
+    case $ext in
+        zip|gz|bz2)
+            if [ ! -d "archives" ]; then
+                mkdir "archives"
+            fi
+            mv "$1" "archives/"
+        ;;
+        jpg|jpeg|png)
+            if [ ! -d "images" ]; then
+                mkdir "images"
+            fi
+            mv "$1" "images/"
+        ;;
+        torrent)
+            if [ ! -d "torrents" ]; then
+                mkdir "torrents"
+            fi
+            mv "$1" "torrents/"
+        ;;
+    esac
+}
+
+cd "$directory"
+
+# classify single file or entire directory?
+if [ -e "$filename" ]; then
+    classify "$filename"
+else
+    IFS=$'\n'
+    for file in $(ls -1 .)
+    do
+        if [ -e "$file" ]; then
+            classify "$file"
+        fi
+    done
+fi
